@@ -29,6 +29,11 @@ if (fs.existsSync('dist')) {
     fs.cpSync('dist', path.join(pluginDir, 'dist'), { recursive: true });
 }
 
+// Copy scripts directory
+if (fs.existsSync('scripts')) {
+    fs.cpSync('scripts', path.join(pluginDir, 'scripts'), { recursive: true });
+}
+
 // Ensure dist directory exists for the zip
 if (!fs.existsSync('dist')) {
     fs.mkdirSync('dist', { recursive: true });
@@ -43,8 +48,8 @@ distFiles.forEach(file => {
 });
 
 // Create zip from the plugin directory using bestzip
-const zipPath = path.join('dist', zipName);
-execSync(`npx bestzip ${zipPath} ${pluginDir}`, { stdio: 'inherit' });
+const zipPath = path.join('out', zipName);
+execSync(`cd ${tempDir} && pnpx bestzip ../${zipPath} * && cd ..`, { stdio: 'inherit' });
 
 // Clean up
 fs.rmSync(tempDir, { recursive: true, force: true });

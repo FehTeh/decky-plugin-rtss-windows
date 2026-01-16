@@ -11,7 +11,7 @@ import {
 import { useState } from "react";
 import { FaChartLine } from "react-icons/fa";
 
-const setRtssProfile = callable<[profile: number], boolean>("set_rtss_profile");
+const setOSDStatus = callable<[profile: number], boolean>("set_osd_status");
 
 function PerformanceOverlayLevel() {
   const [currentProfile, setCurrentProfile] = useState(0);
@@ -19,7 +19,7 @@ function PerformanceOverlayLevel() {
   const handleProfileChange = async (value: number) => {
     setCurrentProfile(value);
     try {
-      const success = await setRtssProfile(value);
+      const success = await setOSDStatus(value);
       if (success) {
         const profileNames = ["OFF", "ON"];
         toaster.toast({
