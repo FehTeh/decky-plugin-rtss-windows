@@ -29,14 +29,24 @@ if (fs.existsSync('dist')) {
     fs.cpSync('dist', path.join(pluginDir, 'dist'), { recursive: true });
 }
 
-// Create zip from the plugin directory using bestzip
-if (fs.existsSync(zipName)) {
-    fs.unlinkSync(zipName);
+// Ensure dist directory exists for the zip
+if (!fs.existsSync('dist')) {
+    fs.mkdirSync('dist', { recursive: true });
 }
 
-execSync(`npx bestzip ${zipName} ${pluginDir}`, { stdio: 'inherit' });
+// Delete any existing zip files in dist/
+const distFiles = fs.readdirSync('dist');
+distFiles.forEach(file => {
+    if (file.endsWith('.zip')) {
+        fs.unlinkSync(path.join('dist', file));
+    }
+});
+
+// Create zip from the plugin directory using bestzip
+const zipPath = path.join('dist', zipName);
+execSync(`npx bestzip ${zipPath} ${pluginDir}`, { stdio: 'inherit' });
 
 // Clean up
 fs.rmSync(tempDir, { recursive: true, force: true });
 
-console.log(`Created ${zipName}`);
+console.log(`Created ${zipPath}`);
