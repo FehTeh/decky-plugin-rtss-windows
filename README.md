@@ -1,54 +1,86 @@
-# Decky Plugin Template [![Chat](https://img.shields.io/badge/chat-on%20discord-7289da.svg)](https://deckbrew.xyz/discord)
+# RTSS Overlay Control Decky Plugin
 
-Reference example for using [decky-frontend-lib](https://github.com/SteamDeckHomebrew/decky-frontend-lib) (@decky/ui) in a [decky-loader](https://github.com/SteamDeckHomebrew/decky-loader) plugin.
+A Decky plugin for controlling RivaTuner Statistics Server (RTSS) overlay visibility on Windows using shared memory.
 
-### **Please also refer to the [wiki](https://wiki.deckbrew.xyz/en/user-guide/home#plugin-development) for important information on plugin development and submissions/updates. currently documentation is split between this README and the wiki which is something we are hoping to rectify in the future.**  
+## Requirements
 
-## Developers
+- Windows 10/11 with Decky Loader installed
+- RivaTuner Statistics Server (RTSS) **installed and running**
+- Node.js v18+ and pnpm for development
 
-### Dependencies
+## Installation
 
-This template relies on the user having Node.js v16.14+ and `pnpm` (v9) installed on their system.  
-Please make sure to install pnpm v9 to prevent issues with CI during plugin submission.  
-`pnpm` can be downloaded from `npm` itself which is recommended.
+1. Install Decky Loader for Windows
+2. Install RivaTuner Statistics Server (RTSS)
+3. **Start RTSS** before using the plugin
+4. Clone this repository
+5. Build and install the plugin following Decky development guidelines
 
-#### Linux
+## Features
 
+- **Binary Overlay Control**: Simple ON/OFF toggle for RTSS overlay visibility
+- **Performance Tab Integration**: Toggle appears in Decky's Performance tab
+- **Real-time Control**: Uses RTSS shared memory for instant overlay switching
+- **No Hotkey Configuration Required**: Direct memory manipulation, no keyboard simulation
+
+## How It Works
+
+The plugin communicates directly with RTSS through its shared memory interface (`RTSSSharedMemoryV2`). This provides reliable, real-time control of overlay visibility without requiring hotkey configuration or UAC elevation.
+
+### Technical Details
+
+- Reads RTSS shared memory header to locate application entries
+- Modifies application flags to request profile updates
+- Works with any RTSS-monitored application (games, benchmarks, etc.)
+- No dependency on RTSS hotkey settings
+
+### Important Notes
+
+- RTSS must be running and monitoring applications for the plugin to work
+- The plugin controls overlay visibility for RTSS-monitored processes
+- Works during gameplay without interrupting the game
+- No administrator privileges required (unlike command-line approaches)
+
+## Development
+
+### Setup
 ```bash
-sudo npm i -g pnpm@9
+pnpm i
+pnpm run build
 ```
 
-If you would like to build plugins that have their own custom backends, Docker is required as it is used by the Decky CLI tool.
-
-### Making your own plugin
-
-1. You can fork this repo or utilize the "Use this template" button on Github.
-2. In your local fork/own plugin-repository run these commands:
-   1. ``pnpm i``
-   2. ``pnpm run build``
-   - These setup pnpm and build the frontend code for testing.
-3. Consult the [decky-frontend-lib](https://github.com/SteamDeckHomebrew/decky-frontend-lib) repository for ways to accomplish your tasks.
-   - Documentation and examples are still rough, 
-   - Decky loader primarily targets Steam Deck hardware so keep this in mind when developing your plugin.
-4. If using VSCodium/VSCode, run the `setup` and `build` and `deploy` tasks. If not using VSCodium etc. you can derive your own makefile or just manually utilize the scripts for these commands as you see fit.
-
-If you use VSCode or it's derivatives (we suggest [VSCodium](https://vscodium.com/)!) just run the `setup` and `build` tasks. It's really that simple.
-
-#### Other important information
-
-Everytime you change the frontend code (`index.tsx` etc) you will need to rebuild using the commands from step 2 above or the build task if you're using vscode or a derivative.
-
-Note: If you are receiving build errors due to an out of date library, you should run this command inside of your repository:
-
+### Building
 ```bash
-pnpm update @decky/ui --latest
+pnpm run build
 ```
 
-### Backend support
+## Usage
 
-If you are developing with a backend for a plugin and would like to submit it to the [decky-plugin-database](https://github.com/SteamDeckHomebrew/decky-plugin-database) you will need to have all backend code located in ``backend/src``, with backend being located in the root of your git repository.
-When building your plugin, the source code will be built and any finished binary or binaries will be output to ``backend/out`` (which is created during CI.)
-If your buildscript, makefile or any other build method does not place the binary files in the ``backend/out`` directory they will not be properly picked up during CI and your plugin will not have the required binaries included for distribution.
+Once installed in Decky Loader on Windows:
+
+1. **Start RTSS** (RivaTuner Statistics Server)
+2. **Launch a game** that RTSS monitors
+3. **Open Decky's Performance tab** in game mode
+4. **Use the "Performance Overlay Level" toggle** to control RTSS overlay:
+   - **OFF**: Hide overlay completely
+   - **ON**: Show RTSS overlay
+
+The toggle provides instant control without interrupting gameplay. Changes take effect immediately through RTSS shared memory.
+
+## Troubleshooting
+
+**Plugin shows "Failed to set RTSS profile" errors:**
+- Ensure RTSS is running (check system tray for RTSS icon)
+- Start a game that RTSS monitors (most modern games are detected automatically)
+- Check Decky logs for detailed error messages
+
+**Slider doesn't appear in Performance tab:**
+- Restart Decky Loader after installing the plugin
+- Ensure you're in game mode (not desktop mode)
+
+**Overlay doesn't change:**
+- RTSS must be monitoring the active application
+- Some games may require specific RTSS profile settings
 
 Example:  
 In our makefile used to demonstrate the CI process of building and distributing a plugin backend, note that the makefile explicitly creates the `out` folder (``backend/out``) and then compiles the binary into that folder. Here's the relevant snippet.
